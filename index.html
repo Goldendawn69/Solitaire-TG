@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Seven-Hand Solitaire</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="topbar">
+        <div class="header-main">
+          <h1>Seven-Hand Solitaire</h1>
+          <div class="actions">
+            <button id="new-game-button" type="button">New Game</button>
+            <button id="refresh-hand-button" type="button">Refresh Hand</button>
+          </div>
+        </div>
+        <p id="status" class="status" aria-live="polite"></p>
+      </header>
+
+      <div class="game-layout">
+        <div class="game-area">
+          <section class="top-row" aria-label="Stock, waste, and foundations">
+            <div class="pile-row">
+              <button id="stock-pile" class="pile counter-pile" type="button">
+                <span class="pile-label">Stock</span>
+                <strong id="stock-count">0</strong>
+                <span class="pile-action">Draw</span>
+              </button>
+              <div id="waste-pile" class="pile counter-pile" data-drop-target="waste">
+                <span class="pile-label">Waste</span>
+                <strong id="waste-count">0</strong>
+              </div>
+            </div>
+            <div id="foundations" class="foundations" aria-label="Foundations"></div>
+          </section>
+
+          <section class="transformation-dashboard" aria-label="Transformation tracking">
+            <h2>Transformation</h2>
+            <div id="transformation-stats" class="transformation-stats"></div>
+          </section>
+
+          <section class="hand-section">
+            <h2>Hand</h2>
+            <div id="hand" class="hand" aria-label="Current hand"></div>
+          </section>
+
+          <section class="tableau-section">
+            <h2>Tableau</h2>
+            <div id="tableau" class="tableau" aria-label="Tableau"></div>
+          </section>
+        </div>
+
+        <aside class="event-log-panel" aria-label="Event log">
+          <h2>Event Log</h2>
+          <div id="transformation-log" class="transformation-log" aria-live="polite"></div>
+          <button id="clear-log-button" class="clear-log-button" type="button">Clear Log</button>
+        </aside>
+      </div>
+    </main>
+
+    <script src="rules.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
