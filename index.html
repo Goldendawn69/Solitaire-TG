@@ -15,6 +15,7 @@
             <button id="new-game-button" type="button">New Game</button>
             <button id="refresh-hand-button" type="button">Refresh Hand</button>
             <button id="complete-game-button" type="button">Complete</button>
+            <button id="rules-button" type="button">Rules</button>
           </div>
         </div>
         <p id="status" class="status" aria-live="polite"></p>
@@ -23,18 +24,24 @@
       <div class="game-layout">
         <div class="game-area">
           <section class="top-row" aria-label="Stock, waste, and foundations">
-            <div class="pile-row">
-              <button id="stock-pile" class="pile counter-pile" type="button">
-                <span class="pile-label">Stock</span>
-                <strong id="stock-count">0</strong>
-                <span class="pile-action">Draw</span>
-              </button>
-              <div id="waste-pile" class="pile counter-pile" data-drop-target="waste">
-                <span class="pile-label">Waste</span>
-                <strong id="waste-count">0</strong>
+            <div class="top-card-panel card-flow-panel">
+              <h2>Card Flow</h2>
+              <div class="pile-row">
+                <button id="stock-pile" class="pile counter-pile" type="button">
+                  <span class="pile-label">Stock</span>
+                  <strong id="stock-count">0</strong>
+                  <span class="pile-action">Draw</span>
+                </button>
+                <div id="waste-pile" class="pile counter-pile" data-drop-target="waste">
+                  <span class="pile-label">Waste</span>
+                  <strong id="waste-count">0</strong>
+                </div>
               </div>
             </div>
-            <div id="foundations" class="foundations" aria-label="Foundations"></div>
+            <div class="top-card-panel foundations-panel">
+              <h2>Foundations</h2>
+              <div id="foundations" class="foundations" aria-label="Foundations"></div>
+            </div>
           </section>
 
           <section class="transformation-dashboard" aria-label="Transformation tracking">
@@ -59,9 +66,41 @@
           <button id="clear-log-button" class="clear-log-button" type="button">Clear Log</button>
         </aside>
       </div>
+
+      <div id="rules-dialog" class="rules-dialog" hidden>
+        <div class="rules-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+          <div class="rules-dialog-header">
+            <h2 id="rules-title">Rules</h2>
+            <button id="rules-close-button" class="rules-close-button" type="button" aria-label="Close rules">Close</button>
+          </div>
+          <div class="rules-content">
+            <p>Build each foundation from Ace to King by suit.</p>
+            <p>Move tableau cards in descending rank with alternating colours. Kings may move to empty tableau columns.</p>
+            <p>Draw a 7-card hand from the stock. Play hand cards to the tableau or foundations when legal.</p>
+            <p>Refreshing the hand moves unplayed hand cards to waste, then draws a new hand.</p>
+            <p>Drag the top face-up tableau card to waste if you want to cycle it back later. This adds Curse Pressure.</p>
+            <p>When the stock is empty, the waste pile shuffles back into the stock and Curse Pressure causes transformation ticks.</p>
+            <p>Once all tableau cards are face-up, Complete can move available cards to the foundations automatically.</p>
+          </div>
+        </div>
+      </div>
     </main>
 
-    <script src="rules.js"></script>
-    <script src="app.js"></script>
+    <script src="js/rules/cards.js"></script>
+    <script src="js/systems/transformationSystem.js"></script>
+    <script src="js/systems/cursePressureSystem.js"></script>
+    <script src="js/rules/movementRules.js"></script>
+    <script src="js/rules/stockWasteRules.js"></script>
+    <script src="js/rules/autocompleteRules.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/rules/facade.js"></script>
+    <script src="js/ui/renderCards.js"></script>
+    <script src="js/ui/renderTransformation.js"></script>
+    <script src="js/ui/eventLog.js"></script>
+    <script src="js/ui/animation.js"></script>
+    <script src="js/ui/renderBoard.js"></script>
+    <script src="js/ui/dragDrop.js"></script>
+    <script src="js/ui/controls.js"></script>
+    <script src="js/main.js"></script>
   </body>
 </html>

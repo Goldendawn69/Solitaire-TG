@@ -386,6 +386,75 @@ h2 {
   color: var(--brass-bright);
 }
 
+/* Rules Dialog */
+
+.rules-dialog[hidden] {
+  display: none;
+}
+
+.rules-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.48);
+  padding: 18px;
+}
+
+.rules-dialog-panel {
+  width: min(520px, 100%);
+  max-height: min(620px, calc(100vh - 36px));
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(11, 24, 27, 0.96), rgba(5, 13, 16, 0.94));
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.top-card-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.top-card-panel h2 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.foundations-panel {
+  justify-items: end;
+}
+
+.rules-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.rules-dialog-header h2 {
+  margin: 0;
+}
+
+.rules-close-button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(30, 43, 44, 0.9), rgba(8, 18, 22, 0.88));
+  color: var(--text);
+  cursor: pointer;
+}
+
+.rules-content {
+  display: grid;
+  gap: 10px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 /* Piles And Foundations */
 
 .pile-row,
@@ -429,9 +498,14 @@ h2 {
 
 .pile-action {
   display: block;
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 12px;
+  width: max-content;
+  margin: 5px auto 0;
+  border: 1px solid rgba(244, 212, 131, 0.34);
+  border-radius: 999px;
+  background: rgba(244, 212, 131, 0.12);
+  color: var(--brass-bright);
+  font-size: 11px;
+  padding: 2px 8px;
   text-transform: uppercase;
 }
 
