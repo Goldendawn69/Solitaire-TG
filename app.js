@@ -6,6 +6,7 @@
   var selected = null;
   var dragSelection = null;
   var revealAnimationCards = {};
+  var autoCompleteRunning = false;
   var lastHandRefreshAt = 0;
   var HAND_REFRESH_GUARD_MS = 700;
 
@@ -22,7 +23,8 @@
     hand: document.getElementById("hand"),
     tableau: document.getElementById("tableau"),
     newGameButton: document.getElementById("new-game-button"),
-    refreshHandButton: document.getElementById("refresh-hand-button")
+    refreshHandButton: document.getElementById("refresh-hand-button"),
+    completeGameButton: document.getElementById("complete-game-button")
   };
 
   function startNewGame() {
@@ -60,6 +62,7 @@
     renderTransformation();
     renderHand();
     renderTableau();
+    elements.completeGameButton.disabled = autoCompleteRunning || !rules.canAutoComplete(state);
     animateCardMovement(previousCardRects);
     revealAnimationCards = {};
   }
@@ -141,14 +144,24 @@
       "legsFeet",
       "breasts",
       "torso",
-      "clothing"
+      "clothing",
+      "total"
     ];
 
     elements.transformationStats.innerHTML = "";
     tracks.forEach(function (track) {
       var stat = document.createElement("div");
       var value = transformationState[track];
-      stat.className = "tf-stat";
+      stat.className = track === "total" ? "tf-stat tf-stat-total" : "tf-stat";
+
+      if (track === "total") {
+        stat.innerHTML =
+          '<div class="tf-stat-header"><span class="tf-label">Total</span><span class="tf-value">' +
+          value +
+          "/55</span></div>";
+        elements.transformationStats.appendChild(stat);
+        return;
+      }
 
       stat.appendChild(createTransformationStatHeader(track, value));
       stat.appendChild(createTransformationSegments(value));
@@ -211,11 +224,22 @@
 
     var stage = document.createElement("span");
     stage.className = "tf-value";
-    stage.textContent = value + "/5";
+    stage.textContent = formatTransformationValue(track, value);
 
     header.appendChild(label);
     header.appendChild(stage);
     return header;
+  }
+
+  function formatTransformationValue(track, value) {
+    var namedStages = {
+      breasts: ["Flat", "A", "B", "C", "D", "E"],
+      genitals: ["Large", "Medium", "Small", "Very small", "Vagina", "Vagina"]
+    };
+    if (namedStages[track]) {
+      return namedStages[track][Math.min(value, namedStages[track].length - 1)];
+    }
+    return value + "/5";
   }
 
   function createTransformationSegments(value) {
@@ -711,8 +735,41 @@
     render(card ? "Wasted " + rules.cardLabel(card) + " from tableau." : "Only the top face-up card of a tableau column can be wasted.");
   }
 
+  function startAutoComplete() {
+    if (autoCompleteRunning || !rules.canAutoComplete(state)) {
+      render("Complete is available once all tableau cards are exposed.");
+      return;
+    }
+
+    selected = null;
+    dragSelection = null;
+    autoCompleteRunning = true;
+    runAutoCompleteStep();
+  }
+
+  function runAutoCompleteStep() {
+    var move = rules.findAutoCompleteMove(state);
+    if (!move) {
+      autoCompleteRunning = false;
+      render(rules.hasWon(state) ? "You won." : "No more automatic foundation moves are available.");
+      return;
+    }
+
+    var card = rules.applyAutoCompleteMove(state, move);
+    render(card ? "Completing: moved " + rules.cardLabel(card) + " to foundation." : "No more automatic foundation moves are available.");
+
+    if (rules.hasWon(state)) {
+      autoCompleteRunning = false;
+      render("You won.");
+      return;
+    }
+
+    window.setTimeout(runAutoCompleteStep, 180);
+  }
+
   elements.newGameButton.addEventListener("click", startNewGame);
   elements.refreshHandButton.addEventListener("click", refreshCurrentHand);
+  elements.completeGameButton.addEventListener("click", startAutoComplete);
   elements.clearLogButton.addEventListener("click", function () {
     state.transformationLog = [];
     render("Event log cleared.");

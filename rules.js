@@ -244,7 +244,18 @@
     if (amount <= 0) {
       return label + " transformation: " + track + " is already stage " + stage + ".";
     }
-    return label + " transformation: " + track + " increased to stage " + stage + ".";
+    return label + " transformation: " + track + " increased to " + formatTransformationStage(track, stage) + ".";
+  }
+
+  function formatTransformationStage(track, stage) {
+    var namedStages = {
+      breasts: ["Flat", "A", "B", "C", "D", "E"],
+      genitals: ["Large", "Medium", "Small", "Very small", "Vagina", "Vagina"]
+    };
+    if (namedStages[track]) {
+      return namedStages[track][Math.min(stage, namedStages[track].length - 1)];
+    }
+    return "stage " + stage;
   }
 
   function addCursePressure(state, amount, message) {
@@ -257,16 +268,25 @@
   }
 
   function getCursePressureTickCount(cursePressure) {
-    if (cursePressure >= 21) {
+    if (cursePressure >= 15) {
+      return 6;
+    }
+    if (cursePressure >= 12) {
+      return 5;
+    }
+    if (cursePressure >= 9) {
       return 4;
     }
-    if (cursePressure >= 13) {
+    if (cursePressure >= 6) {
       return 3;
     }
-    if (cursePressure >= 6) {
+    if (cursePressure >= 3) {
       return 2;
     }
-    return 1;
+    if (cursePressure >= 1) {
+      return 1;
+    }
+    return 0;
   }
 
   function applyRecycleTransformationTick(state, suitCounts) {
@@ -282,8 +302,8 @@
     transformationState.total += actualAdded;
 
     return addGameLog(state, actualAdded > 0
-      ? "Recycle transformation: " + track + " increased to stage " + nextStage + "."
-      : "Recycle transformation: " + track + " is already stage " + nextStage + ".", {
+      ? "Recycle transformation: " + track + " increased to " + formatTransformationStage(track, nextStage) + "."
+      : "Recycle transformation: " + track + " is already " + formatTransformationStage(track, nextStage) + ".", {
       type: "recycle-transformation",
       suit: suit,
       track: track,
@@ -413,6 +433,90 @@
     return true;
   }
 
+  function isTableauFullyExposed(state) {
+    return state.tableau.every(function (column) {
+      return column.every(function (card) {
+        return card.faceUp;
+      });
+    });
+  }
+
+  function findAutoCompleteMove(state) {
+    var handMove = findFoundationMoveInPile(state.hand, state);
+    if (handMove) {
+      handMove.source = "hand";
+      return handMove;
+    }
+
+    for (var columnIndex = 0; columnIndex < state.tableau.length; columnIndex += 1) {
+      var column = state.tableau[columnIndex];
+      var card = column[column.length - 1];
+      if (card && card.faceUp && canPlaceOnFoundation(card, state.foundations[card.suit])) {
+        return {
+          source: "tableau",
+          columnIndex: columnIndex,
+          card: card
+        };
+      }
+    }
+
+    var stockMove = findFoundationMoveInPile(state.stock, state);
+    if (stockMove) {
+      stockMove.source = "stock";
+      return stockMove;
+    }
+
+    var wasteMove = findFoundationMoveInPile(state.waste, state);
+    if (wasteMove) {
+      wasteMove.source = "waste";
+      return wasteMove;
+    }
+
+    return null;
+  }
+
+  function findFoundationMoveInPile(pile, state) {
+    for (var index = 0; index < pile.length; index += 1) {
+      var card = pile[index];
+      if (canPlaceOnFoundation(card, state.foundations[card.suit])) {
+        return {
+          index: index,
+          card: card
+        };
+      }
+    }
+    return null;
+  }
+
+  function applyAutoCompleteMove(state, move) {
+    if (!move || !canPlaceOnFoundation(move.card, state.foundations[move.card.suit])) {
+      return null;
+    }
+
+    var card = null;
+    if (move.source === "hand") {
+      card = state.hand.splice(move.index, 1)[0];
+    } else if (move.source === "stock") {
+      card = state.stock.splice(move.index, 1)[0];
+    } else if (move.source === "waste") {
+      card = state.waste.splice(move.index, 1)[0];
+    } else if (move.source === "tableau") {
+      card = state.tableau[move.columnIndex].pop();
+    }
+
+    if (!card) {
+      return null;
+    }
+
+    card.faceUp = true;
+    state.foundations[card.suit].push(card);
+    return card;
+  }
+
+  function canAutoComplete(state) {
+    return isTableauFullyExposed(state) && Boolean(findAutoCompleteMove(state));
+  }
+
   function wasteTopTableauCard(state, columnIndex) {
     var column = state.tableau[columnIndex];
     if (!column || !column.length) {
@@ -499,6 +603,7 @@
     getCursePressureTickCount: getCursePressureTickCount,
     applyRecycleTransformations: applyRecycleTransformations,
     applyRecycleTransformationTick: applyRecycleTransformationTick,
+    formatTransformationStage: formatTransformationStage,
     countSuits: countSuits,
     pickWeightedSuit: pickWeightedSuit,
     pickDominantSuit: pickDominantSuit,
@@ -513,6 +618,10 @@
     moveHandCardToTableau: moveHandCardToTableau,
     moveTableauCardToFoundation: moveTableauCardToFoundation,
     moveTableauStack: moveTableauStack,
+    isTableauFullyExposed: isTableauFullyExposed,
+    findAutoCompleteMove: findAutoCompleteMove,
+    applyAutoCompleteMove: applyAutoCompleteMove,
+    canAutoComplete: canAutoComplete,
     wasteTopTableauCard: wasteTopTableauCard,
     hasWon: hasWon,
     buildShuffledGame: buildShuffledGame
